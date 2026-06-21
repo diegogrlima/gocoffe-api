@@ -4,6 +4,7 @@ import github.com.diegogrlima.gocoffe.dto.CreateCategoryOutput;
 import github.com.diegogrlima.gocoffe.dto.GetAllCategoryOutput;
 import github.com.diegogrlima.gocoffe.usecase.CreateCategoryUseCase;
 import github.com.diegogrlima.gocoffe.usecase.GetAllCategoryUseCase;
+import github.com.diegogrlima.gocoffe.usecase.DeleteCategoryByIdUseCase;
 import github.com.diegogrlima.gocoffe.usecase.UpdateCategoryByIdUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -39,6 +41,9 @@ class CategoryControllerTest {
 
     @Mock
     private UpdateCategoryByIdUseCase updateCategoryByIdUseCase;
+
+    @Mock
+    private DeleteCategoryByIdUseCase deleteCategoryByIdUseCase;
 
     @InjectMocks
     private CategoryController categoryController;
@@ -102,5 +107,17 @@ class CategoryControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(updateCategoryByIdUseCase).execute(any());
+    }
+
+    @Test
+    void shouldReturn204WhenDeleteCategory() throws Exception {
+        UUID categoryId = UUID.randomUUID();
+
+        doNothing().when(deleteCategoryByIdUseCase).execute(any());
+
+        mockMvc.perform(delete("/categories/" + categoryId))
+                .andExpect(status().isNoContent());
+
+        verify(deleteCategoryByIdUseCase).execute(categoryId);
     }
 }
