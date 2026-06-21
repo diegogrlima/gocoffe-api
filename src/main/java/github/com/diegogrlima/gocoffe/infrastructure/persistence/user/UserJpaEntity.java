@@ -1,4 +1,4 @@
-package github.com.diegogrlima.gocoffe.domain.user.entity;
+package github.com.diegogrlima.gocoffe.infrastructure.persistence.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,15 +8,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.hibernate.annotations.CreationTimestamp;
+
+import github.com.diegogrlima.gocoffe.domain.user.entity.Role;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,24 +25,19 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 100, message = "Name must not exceed 100 characters")
     @Column(nullable = false, length = 100)
     private String name;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email must be valid")
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @NotBlank(message = "Password is required")
     @Column(nullable = false)
     private String password;
 
