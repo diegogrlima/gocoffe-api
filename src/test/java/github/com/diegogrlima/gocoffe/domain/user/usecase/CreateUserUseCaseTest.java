@@ -36,9 +36,9 @@ class CreateUserUseCaseTest {
     private CreateUserUseCase createUserUseCase;
 
     @Test
-    void shouldCreateUserWhenAdminAndValidInput() {
+    void shouldCreateUserWithRoleUSER() {
         CreateUserInput input = new CreateUserInput(
-                "Diego", "diego@test.com", "123456", Role.USER);
+                "Diego", "diego@test.com", "123456");
 
         when(userRepository.findByEmail("diego@test.com"))
                 .thenReturn(Optional.empty());
@@ -54,7 +54,7 @@ class CreateUserUseCaseTest {
 
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        CreateUserOutput result = createUserUseCase.execute(input, Role.ADMIN);
+        CreateUserOutput result = createUserUseCase.execute(input);
 
         assertNotNull(result);
         assertEquals("Diego", result.name());
@@ -64,37 +64,9 @@ class CreateUserUseCaseTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenNonAdminTriesToCreateUser() {
-        CreateUserInput input = new CreateUserInput(
-                "Diego", "diego@test.com", "123456", Role.USER);
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> createUserUseCase.execute(input, Role.USER));
-
-        assertEquals("Only ADMIN users can create new users", exception.getMessage());
-        verify(userRepository, never()).findByEmail(any());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenTryingToCreateAdminUser() {
-        CreateUserInput input = new CreateUserInput(
-                "Admin2", "admin2@test.com", "123456", Role.ADMIN);
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> createUserUseCase.execute(input, Role.ADMIN));
-
-        assertEquals("Cannot create user with ADMIN role", exception.getMessage());
-        verify(userRepository, never()).findByEmail(any());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
         CreateUserInput input = new CreateUserInput(
-                "Diego", "diego@test.com", "123456", Role.USER);
+                "Diego", "diego@test.com", "123456");
 
         User existingUser = User.builder()
                 .email("diego@test.com")
@@ -105,7 +77,7 @@ class CreateUserUseCaseTest {
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> createUserUseCase.execute(input, Role.ADMIN));
+                () -> createUserUseCase.execute(input));
 
         assertEquals("Email already exists", exception.getMessage());
         verify(userRepository, never()).save(any());

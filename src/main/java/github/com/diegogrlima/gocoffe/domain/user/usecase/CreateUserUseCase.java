@@ -16,15 +16,7 @@ public class CreateUserUseCase {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public CreateUserOutput execute(CreateUserInput input, Role currentUserRole) {
-        if (currentUserRole != Role.ADMIN) {
-            throw new RuntimeException("Only ADMIN users can create new users");
-        }
-
-        if (input.role() == Role.ADMIN) {
-            throw new RuntimeException("Cannot create user with ADMIN role");
-        }
-
+    public CreateUserOutput execute(CreateUserInput input) {
         userRepository.findByEmail(input.email())
                 .ifPresent(user -> {
                     throw new RuntimeException("Email already exists");
@@ -34,7 +26,7 @@ public class CreateUserUseCase {
                 .name(input.name())
                 .email(input.email())
                 .password(passwordEncoder.encode(input.password()))
-                .role(input.role())
+                .role(Role.USER)
                 .build();
 
         User savedUser = userRepository.save(user);

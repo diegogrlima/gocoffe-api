@@ -1,9 +1,7 @@
 package github.com.diegogrlima.gocoffe.application.dto.user;
 
-import github.com.diegogrlima.gocoffe.domain.user.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record CreateUserInput(
@@ -17,9 +15,6 @@ public record CreateUserInput(
 
         @NotBlank(message = "Password is required")
         @Size(min = 6, message = "Password must be at least 6 characters")
-        String password,
-
-        @NotNull(message = "Role is required")
-        Role role
+        String password
 ) {
 }
