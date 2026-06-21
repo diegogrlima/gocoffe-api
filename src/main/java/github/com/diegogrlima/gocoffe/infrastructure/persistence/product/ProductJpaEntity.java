@@ -1,4 +1,4 @@
-package github.com.diegogrlima.gocoffe.domain.product.entity;
+package github.com.diegogrlima.gocoffe.infrastructure.persistence.product;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,19 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import github.com.diegogrlima.gocoffe.domain.category.entity.Category;
+import github.com.diegogrlima.gocoffe.infrastructure.persistence.category.CategoryJpaEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,24 +28,19 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class ProductJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 100, message = "Name must not exceed 100 characters")
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Size(max = 500, message = "Description must not exceed 500 characters")
     @Column(length = 500)
     private String description;
 
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be greater than zero")
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
@@ -60,8 +50,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    @NotNull(message = "Category is required")
-    private Category category;
+    private CategoryJpaEntity category;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

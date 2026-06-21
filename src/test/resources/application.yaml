@@ -8,3 +8,8 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+
+api:
+  security:
+    token:
+      secret: test-secret-key-for-unit-tests-only-must-be-long-enough-for-hmac-sha256
