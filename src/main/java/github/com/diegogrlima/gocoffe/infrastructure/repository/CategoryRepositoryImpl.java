@@ -7,8 +7,10 @@ import github.com.diegogrlima.gocoffe.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -59,5 +61,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                 .createdAt(jpaEntity.getCreatedAt())
                 .updatedAt(jpaEntity.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public List<Category> findAll() {
+        return categoryJpaRepository.findAll().stream()
+                .map(this::toDomainEntity)
+                .collect(Collectors.toList());
     }
 }

@@ -1,7 +1,9 @@
 package github.com.diegogrlima.gocoffe.controller;
 
 import github.com.diegogrlima.gocoffe.dto.CreateCategoryOutput;
+import github.com.diegogrlima.gocoffe.dto.GetAllCategoryOutput;
 import github.com.diegogrlima.gocoffe.usecase.CreateCategoryUseCase;
+import github.com.diegogrlima.gocoffe.usecase.GetAllCategoryUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,10 +14,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,6 +30,9 @@ class CategoryControllerTest {
 
     @Mock
     private CreateCategoryUseCase createCategoryUseCase;
+
+    @Mock
+    private GetAllCategoryUseCase getAllCategoryUseCase;
 
     @InjectMocks
     private CategoryController categoryController;
@@ -52,5 +60,26 @@ class CategoryControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(categoryId.toString()))
                 .andExpect(jsonPath("$.name").value(name));
+    }
+
+    @Test
+    void shouldReturn200WhenFindAllCategories() throws Exception {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
+        GetAllCategoryOutput category1 = new GetAllCategoryOutput(id1, "Bebidas");
+        GetAllCategoryOutput category2 = new GetAllCategoryOutput(id2, "Sobremesas");
+
+        when(getAllCategoryUseCase.execute())
+                .thenReturn(List.of(category1, category2));
+
+        mockMvc.perform(get("/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(id1.toString()))
+                .andExpect(jsonPath("$[0].name").value("Bebidas"))
+                .andExpect(jsonPath("$[1].id").value(id2.toString()))
+                .andExpect(jsonPath("$[1].name").value("Sobremesas"));
+
+        verify(getAllCategoryUseCase).execute();
     }
 }
