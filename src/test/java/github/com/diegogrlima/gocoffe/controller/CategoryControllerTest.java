@@ -4,6 +4,7 @@ import github.com.diegogrlima.gocoffe.dto.CreateCategoryOutput;
 import github.com.diegogrlima.gocoffe.dto.GetAllCategoryOutput;
 import github.com.diegogrlima.gocoffe.usecase.CreateCategoryUseCase;
 import github.com.diegogrlima.gocoffe.usecase.GetAllCategoryUseCase;
+import github.com.diegogrlima.gocoffe.usecase.UpdateCategoryByIdUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,10 +19,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,6 +36,9 @@ class CategoryControllerTest {
 
     @Mock
     private GetAllCategoryUseCase getAllCategoryUseCase;
+
+    @Mock
+    private UpdateCategoryByIdUseCase updateCategoryByIdUseCase;
 
     @InjectMocks
     private CategoryController categoryController;
@@ -81,5 +87,20 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$[1].name").value("Sobremesas"));
 
         verify(getAllCategoryUseCase).execute();
+    }
+
+    @Test
+    void shouldReturn204WhenUpdateCategory() throws Exception {
+        UUID categoryId = UUID.randomUUID();
+        String updatedName = "Bebidas Atualizado";
+
+        doNothing().when(updateCategoryByIdUseCase).execute(any());
+
+        mockMvc.perform(put("/categories/" + categoryId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"" + updatedName + "\"}"))
+                .andExpect(status().isNoContent());
+
+        verify(updateCategoryByIdUseCase).execute(any());
     }
 }

@@ -69,4 +69,10 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                 .map(this::toDomainEntity)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void UpdateCategory(Category category) {
+        CategoryJpaEntity jpaEntity = toJpaEntity(category);
+        categoryJpaRepository.save(jpaEntity);
+    }
 }
