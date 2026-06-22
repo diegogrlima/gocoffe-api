@@ -2,13 +2,9 @@ package github.com.diegogrlima.gocoffe.infrastructure.persistence.product;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,19 +28,8 @@ public class ProductImageJpaEntity {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(nullable = false)
-    private String fileName;
-
-    @Column(name = "content_type", nullable = false)
-    private String contentType;
-
-    @Lob
-    @Column(nullable = false)
-    private byte[] data;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private ProductJpaEntity product;
+    @Column(name = "image_url", nullable = false)
+    private String imageURL;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
