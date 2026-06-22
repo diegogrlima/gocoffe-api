@@ -1,4 +1,4 @@
-package github.com.diegogrlima.gocoffe.application.dto.product;
+package github.com.diegogrlima.gocoffe.application.dto;
 
 import java.util.List;
 

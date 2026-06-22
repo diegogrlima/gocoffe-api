@@ -2,12 +2,14 @@ package github.com.diegogrlima.gocoffe.domain.user.usecase;
 
 import github.com.diegogrlima.gocoffe.domain.user.entity.User;
 import github.com.diegogrlima.gocoffe.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -28,6 +30,13 @@ class CreateDefaultAdminUseCaseTest {
 
     @InjectMocks
     private CreateDefaultAdminUseCase createDefaultAdminUseCase;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(createDefaultAdminUseCase, "adminEmail", "admin@gocoffe.com");
+        ReflectionTestUtils.setField(createDefaultAdminUseCase, "adminPassword", "admin123");
+        ReflectionTestUtils.setField(createDefaultAdminUseCase, "adminName", "Admin");
+    }
 
     @Test
     void shouldCreateAdminWhenNotExists() {

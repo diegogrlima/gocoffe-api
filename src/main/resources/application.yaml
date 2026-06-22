@@ -2,10 +2,20 @@ spring:
   application:
     name: api
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gocoffe}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:admin}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET}
+
+admin:
+  email: ${ADMIN_EMAIL:admin@gocoffe.com}
+  password: ${ADMIN_PASSWORD}
+  name: ${ADMIN_NAME:Admin}

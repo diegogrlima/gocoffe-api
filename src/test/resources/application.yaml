@@ -12,4 +12,9 @@ spring:
 api:
   security:
     token:
-      secret: test-secret-key-for-unit-tests-only-must-be-long-enough-for-hmac-sha256
+      secret: test-secret-key-for-unit-tests-only-must-be-long-enough
+
+admin:
+  email: admin@gocoffe.com
+  password: admin123
+  name: Admin

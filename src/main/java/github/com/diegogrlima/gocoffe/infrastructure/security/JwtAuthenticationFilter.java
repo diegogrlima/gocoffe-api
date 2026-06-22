@@ -1,5 +1,7 @@
 package github.com.diegogrlima.gocoffe.infrastructure.security;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtService.validateToken(token);
 
             if (email != null) {
-                String role = extractRoleFromToken(token);
+                String role = extractRoleFromValidatedToken(token);
                 var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
                 var authentication = new UsernamePasswordAuthenticationToken(
@@ -53,9 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authHeader.substring(7);
     }
 
-    private String extractRoleFromToken(String token) {
+    private String extractRoleFromValidatedToken(String token) {
         try {
-            var decodedJWT = com.auth0.jwt.JWT.decode(token);
+            DecodedJWT decodedJWT = JWT.decode(token);
             return decodedJWT.getClaim("role").asString();
         } catch (Exception e) {
             return "USER";
