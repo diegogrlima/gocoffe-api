@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -22,6 +23,7 @@ public class JwtService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
+                    .withJWTId(UUID.randomUUID().toString())
                     .withIssuer("gocoffe-api")
                     .withSubject(user.getEmail())
                     .withClaim("role", user.getRole().name())
@@ -40,6 +42,19 @@ public class JwtService {
                     .build()
                     .verify(token)
                     .getSubject();
+        } catch (JWTVerificationException exception) {
+            return null;
+        }
+    }
+
+    public String extractTokenId(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                    .withIssuer("gocoffe-api")
+                    .build()
+                    .verify(token)
+                    .getId();
         } catch (JWTVerificationException exception) {
             return null;
         }

@@ -2,6 +2,7 @@ package github.com.diegogrlima.gocoffe.infrastructure.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import github.com.diegogrlima.gocoffe.domain.auth.repository.RevokedTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -32,6 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtService.validateToken(token);
 
             if (email != null) {
+                String tokenId = jwtService.extractTokenId(token);
+
+                if (tokenId != null && revokedTokenRepository.isTokenRevoked(tokenId)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 String role = extractRoleFromValidatedToken(token);
                 var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
