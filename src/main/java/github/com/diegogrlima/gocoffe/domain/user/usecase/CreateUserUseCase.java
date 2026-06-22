@@ -19,7 +19,7 @@ public class CreateUserUseCase {
     public CreateUserOutput execute(CreateUserInput input) {
         userRepository.findByEmail(input.email())
                 .ifPresent(user -> {
-                    throw new RuntimeException("Email already exists");
+                    throw new RuntimeException("Registration failed");
                 });
 
         User user = User.builder()

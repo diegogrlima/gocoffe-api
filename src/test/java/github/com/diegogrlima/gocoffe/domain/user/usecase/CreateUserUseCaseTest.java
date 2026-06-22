@@ -38,11 +38,11 @@ class CreateUserUseCaseTest {
     @Test
     void shouldCreateUserWithRoleUSER() {
         CreateUserInput input = new CreateUserInput(
-                "Diego", "diego@test.com", "123456");
+                "Diego", "diego@test.com", "Senha123");
 
         when(userRepository.findByEmail("diego@test.com"))
                 .thenReturn(Optional.empty());
-        when(passwordEncoder.encode("123456"))
+        when(passwordEncoder.encode("Senha123"))
                 .thenReturn("$2a$10$encodedPassword");
 
         User savedUser = User.builder()
@@ -66,7 +66,7 @@ class CreateUserUseCaseTest {
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
         CreateUserInput input = new CreateUserInput(
-                "Diego", "diego@test.com", "123456");
+                "Diego", "diego@test.com", "Senha123");
 
         User existingUser = User.builder()
                 .email("diego@test.com")
@@ -79,7 +79,7 @@ class CreateUserUseCaseTest {
                 RuntimeException.class,
                 () -> createUserUseCase.execute(input));
 
-        assertEquals("Email already exists", exception.getMessage());
+        assertEquals("Registration failed", exception.getMessage());
         verify(userRepository, never()).save(any());
     }
 }
