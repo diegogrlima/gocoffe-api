@@ -7,6 +7,8 @@ import github.com.diegogrlima.gocoffe.infrastructure.persistence.category.Catego
 import github.com.diegogrlima.gocoffe.infrastructure.persistence.product.ProductJpaEntity;
 import github.com.diegogrlima.gocoffe.infrastructure.persistence.product.ProductJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -44,6 +46,11 @@ public class ProductRepositoryImpl implements ProductRepository {
         return productJpaRepository.findAll().stream()
                 .map(this::toDomainEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Product> findAll(Pageable pageable) {
+        return productJpaRepository.findAll(pageable).map(this::toDomainEntity);
     }
 
     @Override
