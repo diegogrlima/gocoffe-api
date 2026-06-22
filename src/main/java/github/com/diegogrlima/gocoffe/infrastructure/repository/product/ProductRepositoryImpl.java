@@ -34,6 +34,12 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
+    public Optional<Product> findByName(String name) {
+        return productJpaRepository.findByName(name)
+                .map(this::toDomainEntity);
+    }
+
+    @Override
     public List<Product> findAll() {
         return productJpaRepository.findAll().stream()
                 .map(this::toDomainEntity)
