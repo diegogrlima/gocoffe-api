@@ -1,6 +1,7 @@
 package github.com.diegogrlima.gocoffe.domain.auth.usecase;
 
 import github.com.diegogrlima.gocoffe.application.dto.auth.LogoutOutput;
+import github.com.diegogrlima.gocoffe.config.exception.AuthenticationException;
 import github.com.diegogrlima.gocoffe.domain.auth.repository.RevokedTokenRepository;
 import github.com.diegogrlima.gocoffe.infrastructure.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class LogoutUseCase {
         String email = jwtService.validateToken(token);
 
         if (email == null) {
-            throw new RuntimeException("Invalid or expired token");
+            throw new AuthenticationException("Invalid or expired token");
         }
 
         String tokenId = jwtService.extractTokenId(token);

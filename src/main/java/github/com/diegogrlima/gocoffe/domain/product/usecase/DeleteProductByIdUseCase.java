@@ -1,5 +1,7 @@
 package github.com.diegogrlima.gocoffe.domain.product.usecase;
 
+import github.com.diegogrlima.gocoffe.config.exception.ExternalServiceException;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceNotFoundException;
 import github.com.diegogrlima.gocoffe.domain.product.entity.ProductImage;
 import github.com.diegogrlima.gocoffe.domain.product.repository.ImageStorageRepository;
 import github.com.diegogrlima.gocoffe.domain.product.repository.ProductImageRepository;
@@ -20,7 +22,7 @@ public class DeleteProductByIdUseCase {
 
     public void execute(UUID id) {
         productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         List<ProductImage> images = productImageRepository.findAllByProductId(id);
         for (ProductImage image : images) {
@@ -42,7 +44,7 @@ public class DeleteProductByIdUseCase {
             }
         }
         if (uploadIndex == -1 || uploadIndex + 1 >= parts.length) {
-            throw new RuntimeException("Invalid Cloudinary URL");
+            throw new ExternalServiceException("Invalid Cloudinary URL");
         }
         StringBuilder publicId = new StringBuilder();
         for (int i = uploadIndex + 1; i < parts.length; i++) {

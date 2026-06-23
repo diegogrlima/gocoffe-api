@@ -1,6 +1,7 @@
 package github.com.diegogrlima.gocoffe.domain.product.usecase;
 
 import github.com.diegogrlima.gocoffe.application.dto.product.UpdateProductInput;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceNotFoundException;
 import github.com.diegogrlima.gocoffe.domain.category.entity.Category;
 import github.com.diegogrlima.gocoffe.domain.product.entity.Product;
 import github.com.diegogrlima.gocoffe.domain.product.repository.ProductRepository;
@@ -15,7 +16,7 @@ public class UpdateProductByIdUseCase {
 
     public void execute(UpdateProductInput input) {
         Product product = productRepository.findById(input.id())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         Category category = Category.builder()
                 .id(input.categoryId())

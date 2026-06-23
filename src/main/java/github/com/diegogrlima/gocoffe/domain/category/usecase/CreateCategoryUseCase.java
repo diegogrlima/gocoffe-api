@@ -2,6 +2,7 @@ package github.com.diegogrlima.gocoffe.domain.category.usecase;
 
 import github.com.diegogrlima.gocoffe.application.dto.category.CreateCategoryInput;
 import github.com.diegogrlima.gocoffe.application.dto.category.CreateCategoryOutput;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceAlreadyExistsException;
 import github.com.diegogrlima.gocoffe.domain.category.entity.Category;
 import github.com.diegogrlima.gocoffe.domain.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class CreateCategoryUseCase {
         var categoryExists = categoryRepository.findByName(input.name());
 
         if (categoryExists.isPresent()) {
-            throw new RuntimeException("Category already exists");
+            throw new ResourceAlreadyExistsException("Category already exists");
         }
 
         Category category = Category.builder()

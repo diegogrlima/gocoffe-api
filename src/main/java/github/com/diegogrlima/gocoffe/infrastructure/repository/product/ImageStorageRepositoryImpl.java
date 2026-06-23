@@ -2,6 +2,7 @@ package github.com.diegogrlima.gocoffe.infrastructure.repository.product;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import github.com.diegogrlima.gocoffe.config.exception.ExternalServiceException;
 import github.com.diegogrlima.gocoffe.domain.product.repository.ImageStorageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class ImageStorageRepositoryImpl implements ImageStorageRepository {
             );
             return result.get("secure_url").toString();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload image to Cloudinary", e);
+            throw new ExternalServiceException("Failed to upload image to Cloudinary", e);
         }
     }
 
@@ -34,7 +35,7 @@ public class ImageStorageRepositoryImpl implements ImageStorageRepository {
         try {
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to delete image from Cloudinary", e);
+            throw new ExternalServiceException("Failed to delete image from Cloudinary", e);
         }
     }
 }

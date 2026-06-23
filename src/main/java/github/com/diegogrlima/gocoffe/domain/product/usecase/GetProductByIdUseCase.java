@@ -1,6 +1,7 @@
 package github.com.diegogrlima.gocoffe.domain.product.usecase;
 
 import github.com.diegogrlima.gocoffe.application.dto.product.GetProductByIdOutput;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceNotFoundException;
 import github.com.diegogrlima.gocoffe.domain.product.entity.Product;
 import github.com.diegogrlima.gocoffe.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class GetProductByIdUseCase {
 
     public GetProductByIdOutput execute(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         return new GetProductByIdOutput(
                 product.getId(),

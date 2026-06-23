@@ -2,6 +2,7 @@ package github.com.diegogrlima.gocoffe.domain.user.usecase;
 
 import github.com.diegogrlima.gocoffe.application.dto.user.CreateUserInput;
 import github.com.diegogrlima.gocoffe.application.dto.user.CreateUserOutput;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceAlreadyExistsException;
 import github.com.diegogrlima.gocoffe.domain.user.entity.Role;
 import github.com.diegogrlima.gocoffe.domain.user.entity.User;
 import github.com.diegogrlima.gocoffe.domain.user.repository.UserRepository;
@@ -19,7 +20,7 @@ public class CreateUserUseCase {
     public CreateUserOutput execute(CreateUserInput input) {
         userRepository.findByEmail(input.email())
                 .ifPresent(user -> {
-                    throw new RuntimeException("Registration failed");
+                    throw new ResourceAlreadyExistsException("Registration failed");
                 });
 
         User user = User.builder()

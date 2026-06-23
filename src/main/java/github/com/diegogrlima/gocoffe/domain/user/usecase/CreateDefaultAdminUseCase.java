@@ -1,5 +1,6 @@
 package github.com.diegogrlima.gocoffe.domain.user.usecase;
 
+import github.com.diegogrlima.gocoffe.config.exception.ResourceAlreadyExistsException;
 import github.com.diegogrlima.gocoffe.domain.user.entity.Role;
 import github.com.diegogrlima.gocoffe.domain.user.entity.User;
 import github.com.diegogrlima.gocoffe.domain.user.repository.UserRepository;
@@ -27,7 +28,7 @@ public class CreateDefaultAdminUseCase {
     public void execute() {
         userRepository.findByEmail(adminEmail)
                 .ifPresent(user -> {
-                    throw new RuntimeException("Admin user already exists");
+                    throw new ResourceAlreadyExistsException("Admin user already exists");
                 });
 
         User admin = User.builder()

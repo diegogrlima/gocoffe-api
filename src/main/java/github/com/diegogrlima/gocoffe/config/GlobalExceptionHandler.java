@@ -1,5 +1,10 @@
 package github.com.diegogrlima.gocoffe.config;
 
+import github.com.diegogrlima.gocoffe.config.exception.AuthenticationException;
+import github.com.diegogrlima.gocoffe.config.exception.ErrorResponse;
+import github.com.diegogrlima.gocoffe.config.exception.ExternalServiceException;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceAlreadyExistsException;
+import github.com.diegogrlima.gocoffe.config.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -7,55 +12,84 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, Object>> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        return ResponseEntity.badRequest().body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", 400,
-                "error", "Bad Request",
-                "message", "Invalid value for parameter '" + ex.getName() + "'"
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                404,
+                "Not Found",
+                ex.getMessage()
         ));
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        return ResponseEntity.badRequest().body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", 400,
-                "error", "Bad Request",
-                "message", ex.getMessage()
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
+                409,
+                "Conflict",
+                ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(
+                401,
+                "Unauthorized",
+                ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ErrorResponse> handleExternalServiceException(ExternalServiceException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
+                400,
+                "Bad Request",
+                ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                400,
+                "Bad Request",
+                "Invalid value for parameter '" + ex.getName() + "'"
         ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
 
-        return ResponseEntity.badRequest().body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", 400,
-                "error", "Validation Failed",
-                "message", "Invalid input data",
-                "details", errors
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                400,
+                "Validation Failed",
+                String.join(", ", errors)
+        ));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                400,
+                "Bad Request",
+                ex.getMessage()
         ));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", 500,
-                "error", "Internal Server Error",
-                "message", "An unexpected error occurred"
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
+                500,
+                "Internal Server Error",
+                "An unexpected error occurred"
         ));
     }
 }
