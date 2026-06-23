@@ -13,9 +13,9 @@ spring:
 api:
   security:
     token:
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:55d71b8b36dbda49cc3d98d24cf69775ee5a1b6cd03aa48481e0a2dfa64e35b0}
 
 admin:
   email: ${ADMIN_EMAIL:admin@gocoffe.com}
-  password: ${ADMIN_PASSWORD}
+  password: ${ADMIN_PASSWORD:admin123}
   name: ${ADMIN_NAME:Admin}
