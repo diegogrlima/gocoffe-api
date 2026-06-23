@@ -3,6 +3,7 @@ package github.com.diegogrlima.gocoffe.presentation.controller;
 import github.com.diegogrlima.gocoffe.application.dto.PageOutput;
 import github.com.diegogrlima.gocoffe.application.dto.product.*;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.CreateProductUseCase;
+import github.com.diegogrlima.gocoffe.domain.product.usecase.DeleteProductByIdUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetAllProductUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetProductByIdUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.UpdateProductByIdUseCase;
@@ -23,6 +24,7 @@ public class ProductController {
     private final GetAllProductUseCase getAllProductUseCase;
     private final GetProductByIdUseCase getProductByIdUseCase;
     private final UpdateProductByIdUseCase updateProductByIdUseCase;
+    private final DeleteProductByIdUseCase deleteProductByIdUseCase;
 
     @PostMapping
     public ResponseEntity<CreateProductOutput> create(@Valid @RequestBody CreateProductInput input) {
@@ -54,6 +56,12 @@ public class ProductController {
                 input.categoryId()
         );
         updateProductByIdUseCase.execute(updateInput);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        deleteProductByIdUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -8,6 +8,7 @@ import github.com.diegogrlima.gocoffe.application.dto.product.GetProductByIdOutp
 import github.com.diegogrlima.gocoffe.application.dto.product.UpdateProductInput;
 import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.CreateProductUseCase;
+import github.com.diegogrlima.gocoffe.domain.product.usecase.DeleteProductByIdUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetAllProductUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetProductByIdUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.UpdateProductByIdUseCase;
@@ -28,8 +29,10 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -50,6 +53,9 @@ class ProductControllerTest {
 
     @Mock
     private UpdateProductByIdUseCase updateProductByIdUseCase;
+
+    @Mock
+    private DeleteProductByIdUseCase deleteProductByIdUseCase;
 
     @InjectMocks
     private ProductController productController;
@@ -277,5 +283,29 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\",\"price\":-10}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn204WhenDeleteProduct() throws Exception {
+        UUID productId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/products/" + productId))
+                .andExpect(status().isNoContent());
+
+        verify(deleteProductByIdUseCase).execute(productId);
+    }
+
+    @Test
+    void shouldReturn400WhenDeleteProductNotFound() throws Exception {
+        UUID productId = UUID.randomUUID();
+
+        doThrow(new RuntimeException("Product not found"))
+                .when(deleteProductByIdUseCase).execute(productId);
+
+        mockMvc.perform(delete("/products/" + productId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Product not found"));
+
+        verify(deleteProductByIdUseCase).execute(productId);
     }
 }
