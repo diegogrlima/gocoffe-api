@@ -4,8 +4,11 @@ import github.com.diegogrlima.gocoffe.application.dto.PageOutput;
 import github.com.diegogrlima.gocoffe.application.dto.product.CreateProductInput;
 import github.com.diegogrlima.gocoffe.application.dto.product.CreateProductOutput;
 import github.com.diegogrlima.gocoffe.application.dto.product.GetAllProductOutput;
+import github.com.diegogrlima.gocoffe.application.dto.product.GetProductByIdOutput;
+import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.CreateProductUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetAllProductUseCase;
+import github.com.diegogrlima.gocoffe.domain.product.usecase.GetProductByIdUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +42,9 @@ class ProductControllerTest {
     @Mock
     private GetAllProductUseCase getAllProductUseCase;
 
+    @Mock
+    private GetProductByIdUseCase getProductByIdUseCase;
+
     @InjectMocks
     private ProductController productController;
 
@@ -46,7 +52,9 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(productController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
@@ -193,5 +201,52 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.totalPages").value(3));
 
         verify(getAllProductUseCase).execute(2, 5);
+    }
+
+    @Test
+    void shouldReturn200WhenFindProductById() throws Exception {
+        UUID productId = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+
+        GetProductByIdOutput output = new GetProductByIdOutput(
+                productId,
+                "Cafe Especial",
+                "Cafe torrado",
+                new BigDecimal("25.00"),
+                true,
+                categoryId,
+                "Bebidas",
+                now,
+                now
+        );
+
+        when(getProductByIdUseCase.execute(productId)).thenReturn(output);
+
+        mockMvc.perform(get("/products/" + productId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(productId.toString()))
+                .andExpect(jsonPath("$.name").value("Cafe Especial"))
+                .andExpect(jsonPath("$.description").value("Cafe torrado"))
+                .andExpect(jsonPath("$.price").value(25.00))
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.categoryId").value(categoryId.toString()))
+                .andExpect(jsonPath("$.categoryName").value("Bebidas"));
+
+        verify(getProductByIdUseCase).execute(productId);
+    }
+
+    @Test
+    void shouldReturn400WhenProductNotFound() throws Exception {
+        UUID productId = UUID.randomUUID();
+
+        when(getProductByIdUseCase.execute(productId))
+                .thenThrow(new RuntimeException("Product not found"));
+
+        mockMvc.perform(get("/products/" + productId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Product not found"));
+
+        verify(getProductByIdUseCase).execute(productId);
     }
 }
