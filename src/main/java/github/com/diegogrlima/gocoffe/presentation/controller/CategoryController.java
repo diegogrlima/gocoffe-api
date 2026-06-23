@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public class CategoryController {
     private final DeleteCategoryByIdUseCase deleteCategoryByIdUseCase;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CreateCategoryOutput> create(@Valid @RequestBody CreateCategoryInput input) {
         CreateCategoryOutput output = createCategoryUseCase.execute(input);
         return ResponseEntity.status(HttpStatus.CREATED).body(output);
@@ -47,6 +49,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody UpdateCategoryInput input) {
         UpdateCategoryInput updateInput = new UpdateCategoryInput(id, input.name());
         updateCategoryByIdUseCase.execute(updateInput);
@@ -54,6 +57,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         deleteCategoryByIdUseCase.execute(id);
         return ResponseEntity.noContent().build();
