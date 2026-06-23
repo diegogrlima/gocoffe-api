@@ -3,11 +3,13 @@ package github.com.diegogrlima.gocoffe.presentation.controller;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderInput;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderByIdOutput;
+import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderMetricsOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.UpdateOrderStatusInput;
 import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.order.entity.OrderStatus;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.CreateOrderUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderByIdUseCase;
+import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderMetricsUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.UpdateOrderStatusUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +47,9 @@ class OrderControllerTest {
 
     @Mock
     private UpdateOrderStatusUseCase updateOrderStatusUseCase;
+
+    @Mock
+    private GetOrderMetricsUseCase getOrderMetricsUseCase;
 
     @InjectMocks
     private OrderController orderController;
@@ -274,5 +279,35 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":null}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn200WhenGetOrderMetrics() throws Exception {
+        GetOrderMetricsOutput output = new GetOrderMetricsOutput(10L, 3L, 5L);
+
+        when(getOrderMetricsUseCase.execute()).thenReturn(output);
+
+        mockMvc.perform(get("/orders/metrics"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalOrders").value(10))
+                .andExpect(jsonPath("$.preparingOrders").value(3))
+                .andExpect(jsonPath("$.readyOrders").value(5));
+
+        verify(getOrderMetricsUseCase).execute();
+    }
+
+    @Test
+    void shouldReturn200WhenGetOrderMetricsWithZeroValues() throws Exception {
+        GetOrderMetricsOutput output = new GetOrderMetricsOutput(0L, 0L, 0L);
+
+        when(getOrderMetricsUseCase.execute()).thenReturn(output);
+
+        mockMvc.perform(get("/orders/metrics"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalOrders").value(0))
+                .andExpect(jsonPath("$.preparingOrders").value(0))
+                .andExpect(jsonPath("$.readyOrders").value(0));
+
+        verify(getOrderMetricsUseCase).execute();
     }
 }

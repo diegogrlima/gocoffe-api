@@ -59,6 +59,16 @@ public class OrderRepositoryImpl implements OrderRepository {
         orderJpaRepository.deleteById(id);
     }
 
+    @Override
+    public long count() {
+        return orderJpaRepository.count();
+    }
+
+    @Override
+    public long countByStatus(OrderStatus status) {
+        return orderJpaRepository.findByStatus(status).size();
+    }
+
     private OrderJpaEntity toJpaEntity(Order order) {
         return OrderJpaEntity.builder()
                 .id(order.getId())

@@ -3,9 +3,11 @@ package github.com.diegogrlima.gocoffe.presentation.controller;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderInput;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderByIdOutput;
+import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderMetricsOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.UpdateOrderStatusInput;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.CreateOrderUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderByIdUseCase;
+import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderMetricsUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.UpdateOrderStatusUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class OrderController {
     private final CreateOrderUseCase createOrderUseCase;
     private final GetOrderByIdUseCase getOrderByIdUseCase;
     private final UpdateOrderStatusUseCase updateOrderStatusUseCase;
+    private final GetOrderMetricsUseCase getOrderMetricsUseCase;
 
     @PostMapping
     public ResponseEntity<CreateOrderOutput> create(@Valid @RequestBody CreateOrderInput input) {
@@ -49,5 +52,12 @@ public class OrderController {
         UpdateOrderStatusInput updateInput = new UpdateOrderStatusInput(id, input.status());
         updateOrderStatusUseCase.execute(updateInput);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/metrics")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<GetOrderMetricsOutput> getMetrics() {
+        GetOrderMetricsOutput output = getOrderMetricsUseCase.execute();
+        return ResponseEntity.ok(output);
     }
 }

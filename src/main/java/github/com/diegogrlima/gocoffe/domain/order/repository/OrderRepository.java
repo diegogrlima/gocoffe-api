@@ -20,4 +20,8 @@ public interface OrderRepository {
     List<Order> findByCustomerCpf(String customerCpf);
 
     void deleteById(UUID id);
+
+    long count();
+
+    long countByStatus(OrderStatus status);
 }
