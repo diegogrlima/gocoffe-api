@@ -5,10 +5,12 @@ import github.com.diegogrlima.gocoffe.application.dto.product.CreateProductInput
 import github.com.diegogrlima.gocoffe.application.dto.product.CreateProductOutput;
 import github.com.diegogrlima.gocoffe.application.dto.product.GetAllProductOutput;
 import github.com.diegogrlima.gocoffe.application.dto.product.GetProductByIdOutput;
+import github.com.diegogrlima.gocoffe.application.dto.product.UpdateProductInput;
 import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.CreateProductUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetAllProductUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetProductByIdUseCase;
+import github.com.diegogrlima.gocoffe.domain.product.usecase.UpdateProductByIdUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,6 +47,9 @@ class ProductControllerTest {
 
     @Mock
     private GetProductByIdUseCase getProductByIdUseCase;
+
+    @Mock
+    private UpdateProductByIdUseCase updateProductByIdUseCase;
 
     @InjectMocks
     private ProductController productController;
@@ -248,5 +254,28 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.message").value("Product not found"));
 
         verify(getProductByIdUseCase).execute(productId);
+    }
+
+    @Test
+    void shouldReturn204WhenUpdateProduct() throws Exception {
+        UUID productId = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+
+        mockMvc.perform(put("/products/" + productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Cafe Atualizado\",\"description\":\"Cafe premium\",\"price\":35.00,\"categoryId\":\"" + categoryId + "\"}"))
+                .andExpect(status().isNoContent());
+
+        verify(updateProductByIdUseCase).execute(any(UpdateProductInput.class));
+    }
+
+    @Test
+    void shouldReturn400WhenUpdateProductWithInvalidData() throws Exception {
+        UUID productId = UUID.randomUUID();
+
+        mockMvc.perform(put("/products/" + productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"price\":-10}"))
+                .andExpect(status().isBadRequest());
     }
 }
