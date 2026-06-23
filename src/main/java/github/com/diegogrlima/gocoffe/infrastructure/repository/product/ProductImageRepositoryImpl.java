@@ -8,6 +8,7 @@ import github.com.diegogrlima.gocoffe.infrastructure.persistence.product.Product
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,8 +32,21 @@ public class ProductImageRepositoryImpl implements ProductImageRepository {
     }
 
     @Override
+    public List<ProductImage> findAllByProductId(UUID productId) {
+        return productImageJpaRepository.findAllByProductId(productId)
+                .stream()
+                .map(this::toDomainEntity)
+                .toList();
+    }
+
+    @Override
     public void deleteById(UUID id) {
         productImageJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAllByProductId(UUID productId) {
+        productImageJpaRepository.deleteAllByProductId(productId);
     }
 
     private ProductImageJpaEntity toJpaEntity(ProductImage productImage) {

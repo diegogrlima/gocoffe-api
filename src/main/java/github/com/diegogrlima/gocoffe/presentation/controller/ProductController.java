@@ -7,12 +7,14 @@ import github.com.diegogrlima.gocoffe.domain.product.usecase.DeleteProductByIdUs
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetAllProductUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.GetProductByIdUseCase;
 import github.com.diegogrlima.gocoffe.domain.product.usecase.UpdateProductByIdUseCase;
+import github.com.diegogrlima.gocoffe.domain.product.usecase.UploadProductImageUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -26,6 +28,7 @@ public class ProductController {
     private final GetProductByIdUseCase getProductByIdUseCase;
     private final UpdateProductByIdUseCase updateProductByIdUseCase;
     private final DeleteProductByIdUseCase deleteProductByIdUseCase;
+    private final UploadProductImageUseCase uploadProductImageUseCase;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -67,5 +70,14 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         deleteProductByIdUseCase.execute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/images")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UploadImageOutput> uploadImage(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) {
+        UploadImageOutput output = uploadProductImageUseCase.execute(file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(output);
     }
 }
