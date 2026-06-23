@@ -3,10 +3,12 @@ package github.com.diegogrlima.gocoffe.presentation.controller;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderInput;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderByIdOutput;
+import github.com.diegogrlima.gocoffe.application.dto.order.UpdateOrderStatusInput;
 import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.order.entity.OrderStatus;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.CreateOrderUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderByIdUseCase;
+import github.com.diegogrlima.gocoffe.domain.order.usecase.UpdateOrderStatusUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +25,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +42,9 @@ class OrderControllerTest {
 
     @Mock
     private GetOrderByIdUseCase getOrderByIdUseCase;
+
+    @Mock
+    private UpdateOrderStatusUseCase updateOrderStatusUseCase;
 
     @InjectMocks
     private OrderController orderController;
@@ -218,5 +224,55 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.message").value("Order not found"));
 
         verify(getOrderByIdUseCase).execute(orderId);
+    }
+
+    @Test
+    void shouldReturn200WhenUpdateOrderStatus() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/orders/" + orderId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"PREPARING\"}"))
+                .andExpect(status().isOk());
+
+        verify(updateOrderStatusUseCase).execute(any(UpdateOrderStatusInput.class));
+    }
+
+    @Test
+    void shouldReturn200WhenUpdateOrderStatusToReady() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/orders/" + orderId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"READY\"}"))
+                .andExpect(status().isOk());
+
+        verify(updateOrderStatusUseCase).execute(any(UpdateOrderStatusInput.class));
+    }
+
+    @Test
+    void shouldReturn400WhenUpdateOrderStatusNotFound() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        doThrow(new RuntimeException("Order not found"))
+                .when(updateOrderStatusUseCase).execute(any(UpdateOrderStatusInput.class));
+
+        mockMvc.perform(patch("/orders/" + orderId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"PREPARING\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Order not found"));
+
+        verify(updateOrderStatusUseCase).execute(any(UpdateOrderStatusInput.class));
+    }
+
+    @Test
+    void shouldReturn400WhenUpdateOrderStatusIsNull() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/orders/" + orderId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":null}"))
+                .andExpect(status().isBadRequest());
     }
 }
