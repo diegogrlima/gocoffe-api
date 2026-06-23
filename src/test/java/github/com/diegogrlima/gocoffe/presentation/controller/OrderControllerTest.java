@@ -2,9 +2,11 @@ package github.com.diegogrlima.gocoffe.presentation.controller;
 
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderInput;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderOutput;
+import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderByIdOutput;
 import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.order.entity.OrderStatus;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.CreateOrderUseCase;
+import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderByIdUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +23,10 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +36,9 @@ class OrderControllerTest {
 
     @Mock
     private CreateOrderUseCase createOrderUseCase;
+
+    @Mock
+    private GetOrderByIdUseCase getOrderByIdUseCase;
 
     @InjectMocks
     private OrderController orderController;
@@ -176,5 +183,40 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"customerCpf\":\"12345678901\",\"items\":[{\"quantity\":1,\"priceUnit\":10.00}]}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn200WhenGetOrderById() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        GetOrderByIdOutput output = new GetOrderByIdOutput(
+                orderId,
+                "Pedido-7E9X2P",
+                OrderStatus.PENDING
+        );
+
+        when(getOrderByIdUseCase.execute(orderId)).thenReturn(output);
+
+        mockMvc.perform(get("/orders/" + orderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(orderId.toString()))
+                .andExpect(jsonPath("$.orderCode").value("Pedido-7E9X2P"))
+                .andExpect(jsonPath("$.status").value("PENDING"));
+
+        verify(getOrderByIdUseCase).execute(orderId);
+    }
+
+    @Test
+    void shouldReturn400WhenGetOrderNotFound() throws Exception {
+        UUID orderId = UUID.randomUUID();
+
+        when(getOrderByIdUseCase.execute(orderId))
+                .thenThrow(new RuntimeException("Order not found"));
+
+        mockMvc.perform(get("/orders/" + orderId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Order not found"));
+
+        verify(getOrderByIdUseCase).execute(orderId);
     }
 }
