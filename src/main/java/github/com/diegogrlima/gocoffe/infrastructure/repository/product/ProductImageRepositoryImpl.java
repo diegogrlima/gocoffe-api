@@ -4,6 +4,7 @@ import github.com.diegogrlima.gocoffe.domain.product.entity.ProductImage;
 import github.com.diegogrlima.gocoffe.domain.product.repository.ProductImageRepository;
 import github.com.diegogrlima.gocoffe.infrastructure.persistence.product.ProductImageJpaEntity;
 import github.com.diegogrlima.gocoffe.infrastructure.persistence.product.ProductImageJpaRepository;
+import github.com.diegogrlima.gocoffe.infrastructure.persistence.product.ProductJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -35,9 +36,14 @@ public class ProductImageRepositoryImpl implements ProductImageRepository {
     }
 
     private ProductImageJpaEntity toJpaEntity(ProductImage productImage) {
+        ProductJpaEntity productJpa = ProductJpaEntity.builder()
+                .id(productImage.getProductId())
+                .build();
+
         return ProductImageJpaEntity.builder()
                 .id(productImage.getId())
                 .imageURL(productImage.getImageURL())
+                .product(productJpa)
                 .build();
     }
 
@@ -45,6 +51,7 @@ public class ProductImageRepositoryImpl implements ProductImageRepository {
         return ProductImage.builder()
                 .id(jpaEntity.getId())
                 .imageURL(jpaEntity.getImageURL())
+                .productId(jpaEntity.getProduct().getId())
                 .createdAt(jpaEntity.getCreatedAt())
                 .build();
     }

@@ -1,6 +1,7 @@
 package github.com.diegogrlima.gocoffe.domain.product.entity;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,9 @@ public class ProductImage {
 
     @NotBlank(message = "Image URL is required")
     private String imageURL;
+
+    @NotNull(message = "Product is required")
+    private UUID productId;
 
     private LocalDateTime createdAt;
 }
