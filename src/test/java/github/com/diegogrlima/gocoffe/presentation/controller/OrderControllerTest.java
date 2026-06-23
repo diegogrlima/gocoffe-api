@@ -1,13 +1,16 @@
 package github.com.diegogrlima.gocoffe.presentation.controller;
 
+import github.com.diegogrlima.gocoffe.application.dto.PageOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderInput;
 import github.com.diegogrlima.gocoffe.application.dto.order.CreateOrderOutput;
+import github.com.diegogrlima.gocoffe.application.dto.order.GetAllOrderOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderByIdOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.GetOrderMetricsOutput;
 import github.com.diegogrlima.gocoffe.application.dto.order.UpdateOrderStatusInput;
 import github.com.diegogrlima.gocoffe.config.GlobalExceptionHandler;
 import github.com.diegogrlima.gocoffe.domain.order.entity.OrderStatus;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.CreateOrderUseCase;
+import github.com.diegogrlima.gocoffe.domain.order.usecase.GetAllOrderUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderByIdUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.GetOrderMetricsUseCase;
 import github.com.diegogrlima.gocoffe.domain.order.usecase.UpdateOrderStatusUseCase;
@@ -27,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,6 +54,9 @@ class OrderControllerTest {
 
     @Mock
     private GetOrderMetricsUseCase getOrderMetricsUseCase;
+
+    @Mock
+    private GetAllOrderUseCase getAllOrderUseCase;
 
     @InjectMocks
     private OrderController orderController;
@@ -309,5 +316,79 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.readyOrders").value(0));
 
         verify(getOrderMetricsUseCase).execute();
+    }
+
+    @Test
+    void shouldReturn200WhenGetAllOrders() throws Exception {
+        UUID orderId1 = UUID.randomUUID();
+        UUID orderId2 = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.now();
+
+        GetAllOrderOutput order1 = new GetAllOrderOutput(
+                orderId1,
+                "Pedido-7E9X2P",
+                "12345678901",
+                OrderStatus.PENDING,
+                new BigDecimal("50.00"),
+                now
+        );
+
+        GetAllOrderOutput order2 = new GetAllOrderOutput(
+                orderId2,
+                "Pedido-ABC123",
+                "98765432100",
+                OrderStatus.PREPARING,
+                new BigDecimal("30.00"),
+                now
+        );
+
+        PageOutput<GetAllOrderOutput> pageOutput = new PageOutput<>(
+                List.of(order1, order2),
+                0,
+                10,
+                2,
+                1
+        );
+
+        when(getAllOrderUseCase.execute(0, 10)).thenReturn(pageOutput);
+
+        mockMvc.perform(get("/orders")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].id").value(orderId1.toString()))
+                .andExpect(jsonPath("$.content[0].orderCode").value("Pedido-7E9X2P"))
+                .andExpect(jsonPath("$.content[0].status").value("PENDING"))
+                .andExpect(jsonPath("$.content[1].id").value(orderId2.toString()))
+                .andExpect(jsonPath("$.content[1].orderCode").value("Pedido-ABC123"))
+                .andExpect(jsonPath("$.content[1].status").value("PREPARING"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
+
+        verify(getAllOrderUseCase).execute(0, 10);
+    }
+
+    @Test
+    void shouldReturn200WithDefaultPagination() throws Exception {
+        PageOutput<GetAllOrderOutput> pageOutput = new PageOutput<>(
+                List.of(),
+                0,
+                10,
+                0,
+                0
+        );
+
+        when(getAllOrderUseCase.execute(0, 10)).thenReturn(pageOutput);
+
+        mockMvc.perform(get("/orders"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalElements").value(0));
+
+        verify(getAllOrderUseCase).execute(0, 10);
     }
 }

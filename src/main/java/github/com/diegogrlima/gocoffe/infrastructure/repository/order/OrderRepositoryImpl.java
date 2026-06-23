@@ -6,6 +6,8 @@ import github.com.diegogrlima.gocoffe.domain.order.repository.OrderRepository;
 import github.com.diegogrlima.gocoffe.infrastructure.persistence.order.OrderJpaEntity;
 import github.com.diegogrlima.gocoffe.infrastructure.persistence.order.OrderJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -38,6 +40,11 @@ public class OrderRepositoryImpl implements OrderRepository {
         return orderJpaRepository.findAll().stream()
                 .map(this::toDomainEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Order> findAll(Pageable pageable) {
+        return orderJpaRepository.findAll(pageable).map(this::toDomainEntity);
     }
 
     @Override
